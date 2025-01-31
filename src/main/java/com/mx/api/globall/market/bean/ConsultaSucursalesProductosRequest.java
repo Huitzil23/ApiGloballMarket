@@ -1,0 +1,39 @@
+package com.mx.api.globall.market.bean;
+
+import java.util.List;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class ConsultaSucursalesProductosRequest {
+	
+	@JsonProperty(value="codigoPostalPaciente", required = true)
+	@NotNull 
+	@NotEmpty
+	private String codigoPostalPaciente;
+	
+	@JsonProperty(value="latitudPaciente", required = true)
+	@NotNull 
+	@NotEmpty
+	private String latitudPaciente;
+	
+	@JsonProperty(value="longitudPaciente", required = true)
+	@NotNull 
+	@NotEmpty
+	private String longitudPaciente;
+	
+	@JsonProperty(value="compuestosActivos", required = true)	
+	List<CompuestoActivoRequest>compuestosActivos;
+	
+}

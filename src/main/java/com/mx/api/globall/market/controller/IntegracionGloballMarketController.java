@@ -1,5 +1,8 @@
 package com.mx.api.globall.market.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -11,9 +14,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mx.api.globall.market.bean.ConsultaSalesResponse;
+import com.mx.api.globall.market.bean.ConsultaSucursalesProductosRequest;
+import com.mx.api.globall.market.bean.ConsultaSucursalesProductosResponse;
 import com.mx.api.globall.market.bean.OrdenCompraRequest;
 import com.mx.api.globall.market.bean.OrdenCompraResponse;
+import com.mx.api.globall.market.bean.SucursalesAux;
+import com.mx.api.globall.market.bean.ArticulosVentaIn;
+import com.mx.api.globall.market.bean.BuscaSucursalCodigoPostalRequest;
+import com.mx.api.globall.market.bean.BuscaSucursalCodigoPostalResponse;
 import com.mx.api.globall.market.service.ICatalogoPlataformasMarketplaceService;
+import com.mx.api.globall.market.service.ISucursalesService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,17 +41,53 @@ public class IntegracionGloballMarketController {
 	@Autowired
 	ICatalogoPlataformasMarketplaceService plataformaMarketService;
 	
-	@PostMapping("/ordenCompra")
+	@Autowired
+	ISucursalesService sucursalesServices;
+	
+	/*@PostMapping("/consultaSales")
+	@ApiOperation(value="EndPoint Consulta de Sales", response = ConsultaSalesResponse.class)
+	@ApiResponses(value = {
+	        @ApiResponse(code = 200, message = "Retorna el objeto ConsultaSales.")
+	})	
+	public ResponseEntity<?>consultaSales(){
+		
+		ConsultaSalesResponse resp = new ConsultaSalesResponse();
+		
+		return ResponseEntity.ok().body(resp);
+	}*/
+	
+	@PostMapping("/buscaSucursalCodigoPostal")
+	@ApiOperation(value = "EndPoint Busca Sucursales por Código Postal", response = BuscaSucursalCodigoPostalResponse.class)
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Retorna objeto BuscaSucursalCodigoPostalResponse") })
+	public ResponseEntity<?> buscaSucursalCodigoPostal(@ApiParam(value = "Código Postal",required = true) @Valid @RequestBody BuscaSucursalCodigoPostalRequest objCodigoPostal) {
+		BuscaSucursalCodigoPostalResponse resp = new BuscaSucursalCodigoPostalResponse();
+		String cp = objCodigoPostal.getCodigoPostal();
+		resp = sucursalesServices.consultaSucursalesByCodigoPostalAndEstatus(cp, 1);
+		return ResponseEntity.ok().body(resp);
+	}
+	
+	@PostMapping("/buscaSucursalesProductosByCodigoPostal")
+	@ApiOperation(value = "EndPoint Busca Sucursales con inventario por Código Postal", response = BuscaSucursalCodigoPostalResponse.class)
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Retorna objeto BuscaSucursalCodigoPostalResponse") })
+	public ResponseEntity<?> buscaSucursalesProductosByCodigoPostal(@ApiParam(value = "Datos de la busqueda",required = true) @Valid @RequestBody ConsultaSucursalesProductosRequest consultaSucursalesProductosRequest ) {
+		List<ConsultaSucursalesProductosResponse> resp = new ArrayList<ConsultaSucursalesProductosResponse>();		
+		resp = sucursalesServices.buscaIdSucursalesCercaCPDistancia(consultaSucursalesProductosRequest, 3.0f);
+		return ResponseEntity.ok().body(resp);
+	}
+	
+	/*@PostMapping("/ordenCompra")
 	@ApiOperation(value="EndPoint Orden de Compra", response = OrdenCompraResponse.class)
 	@ApiResponses(value = {
 	        @ApiResponse(code = 200, message = "Retorna el objeto OrdenCompraResponse.")
 	})
-	public ResponseEntity<?> ordenCompra(@ApiParam(value = "Datos de la Orden",required = true) @Valid @RequestBody OrdenCompraRequest ordenCompraRequest) {
-		log.info("/ordenCompra");
+	public ResponseEntity<?> ordenCompra(@ApiParam(value = "Datos de la Orden",required = true) @Valid @RequestBody ArticulosVentaIn articulosVentaIn) {
+		log.info("Execute Method Post---> Registra Venta Producto" + articulosVentaIn);*/
 		/*
 		 * AQUI TODA LA LOGICA
 		 */
-		OrdenCompraResponse resp = new OrdenCompraResponse("ok", "100", "1");
+		/*OrdenCompraResponse resp = new OrdenCompraResponse("ok", "100", "1");
 		return ResponseEntity.ok().body(resp);
-	}
+	}*/
+	
+	
 }
