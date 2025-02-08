@@ -12,6 +12,7 @@
 	<artifactId>ApiGloballMarket</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>ApiGloballMarket</name>
+	<packaging>war</packaging>
 	<description>Proyecto ApiRest para Integraciones a MarketPlace</description>
 	<properties>
 		<java.version>11</java.version>

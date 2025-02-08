@@ -60,7 +60,7 @@ public class IntegracionGloballMarketController {
 		return ResponseEntity.ok().body(resp);
 	}*/
 	
-	@PostMapping("/buscaSucursalCodigoPostal")
+	/*@PostMapping("/buscaSucursalCodigoPostal")
 	@ApiOperation(value = "EndPoint Busca Sucursales por Código Postal", response = BuscaSucursalCodigoPostalResponse.class)
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Retorna objeto BuscaSucursalCodigoPostalResponse") })
 	public ResponseEntity<?> buscaSucursalCodigoPostal(@ApiParam(value = "Código Postal",required = true) @Valid @RequestBody BuscaSucursalCodigoPostalRequest objCodigoPostal) {
@@ -68,7 +68,7 @@ public class IntegracionGloballMarketController {
 		String cp = objCodigoPostal.getCodigoPostal();
 		resp = sucursalesServices.consultaSucursalesByCodigoPostalAndEstatus(cp, 1);
 		return ResponseEntity.ok().body(resp);
-	}
+	}*/
 	
 	@PostMapping("/buscaSucursalesProductosByCodigoPostal")
 	@ApiOperation(value = "EndPoint Busca Sucursales con inventario por Código Postal", response = BuscaSucursalCodigoPostalResponse.class)
