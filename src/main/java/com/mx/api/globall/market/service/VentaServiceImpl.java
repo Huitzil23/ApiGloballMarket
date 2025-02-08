@@ -180,7 +180,7 @@ public class VentaServiceImpl implements IVentaService{
     	detVtaMarketplaceService.save(detVta);
 		
 		
-		ResponseMessage respuesta = new ResponseMessage(1,"La orden se ha registrado correctamente", 0);
+		ResponseMessage respuesta = new ResponseMessage(1,"La orden se ha registrado correctamente", idVenta);
 		
 		return respuesta;
 	}
