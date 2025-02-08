@@ -36,4 +36,6 @@ public class CatalogoPlataformasMarketplace {
 	private String usuarioModificacion;
 	@Column(name="FechaModificacion")
 	private Date fechaModificacion;
+	@Column(name = "EstiloClass")
+	private String estiloClass;
 }

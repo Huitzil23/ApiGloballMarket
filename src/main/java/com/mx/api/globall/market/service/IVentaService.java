@@ -39,5 +39,6 @@ public interface IVentaService {
 	//List<DetalleArticulosVtaAux> getDatosDetalleVentaMedikit(Integer IdVenta, Integer IdSucursal) throws ParseException;
 	void deleteVentaByIdVentaAndIdSucursal(Integer IdVenta, Integer IdSucursal);
 	//ResponseExecProc actualizaPrecioArticulo(Articulosaux articulo, Integer idSucursal, Integer idComercio);
+	//public ResponseMessage registraVentaDetalleMarketPlace(ArticulosVentaRequest articulosVentaRequest) throws IOException;
 	
 }

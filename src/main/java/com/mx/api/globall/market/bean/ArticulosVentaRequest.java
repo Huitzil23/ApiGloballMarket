@@ -19,7 +19,7 @@ import lombok.Setter;
 @Builder
 public class ArticulosVentaRequest {
 
-	@JsonProperty(value = "IdSucursal", required = true)
+	@JsonProperty(value = "idSucursal", required = true)
 	private Integer idSucursal;
 	
 	@JsonProperty(value="articulos", required = true)
