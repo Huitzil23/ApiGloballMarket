@@ -78,6 +78,7 @@ public class SucursalesServiceImpl implements ISucursalesService{
 	public List<ConsultaSucursalesProductosResponse> buscaIdSucursalesCercaCPDistancia(ConsultaSucursalesProductosRequest consultaSucursalesProductosRequest, float distancia) {
 		List<SucursalesAux>lstIdSuc = new ArrayList<SucursalesAux>();
 		List<Object> lstObj = new ArrayList<Object>();
+		@SuppressWarnings("unused")
 		String cp = consultaSucursalesProductosRequest.getCodigoPostalPaciente();
 		String latitud = consultaSucursalesProductosRequest.getLatitudPaciente();
 		String longitud = consultaSucursalesProductosRequest.getLongitudPaciente();

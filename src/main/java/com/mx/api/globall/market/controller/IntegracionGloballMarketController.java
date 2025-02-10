@@ -17,15 +17,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mx.api.globall.market.bean.ConsultaSucursalesProductosRequest;
 import com.mx.api.globall.market.bean.ConsultaSucursalesProductosResponse;
+import com.mx.api.globall.market.bean.EstatusOrdenIn;
+import com.mx.api.globall.market.bean.EstatusOrdenResponse;
 import com.mx.api.globall.market.bean.OrdenCompraResponse;
 import com.mx.api.globall.market.bean.ResponseMessage;
 import com.mx.api.globall.market.bean.ArticulosVentaRequest;
-import com.mx.api.globall.market.bean.BuscaSucursalCodigoPostalRequest;
 import com.mx.api.globall.market.bean.BuscaSucursalCodigoPostalResponse;
-import com.mx.api.globall.market.service.ICatalogoPlataformasMarketplaceService;
 import com.mx.api.globall.market.service.ISucursalesService;
-import com.mx.api.globall.market.service.IVentaService;
 import com.mx.api.globall.market.service.VentaServiceImpl;
+import com.mx.api.globall.market.service.VentasMarketplaceServiceImpl;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -47,6 +47,9 @@ public class IntegracionGloballMarketController {
 	
 	@Autowired
 	private VentaServiceImpl ventaServiceImpl;
+	
+	@Autowired
+	private VentasMarketplaceServiceImpl ventasMarketplaceServiceImpl;
 	
 	/*@PostMapping("/consultaSales")
 	@ApiOperation(value="EndPoint Consulta de Sales", response = ConsultaSalesResponse.class)
@@ -90,5 +93,14 @@ public class IntegracionGloballMarketController {
 		return ResponseEntity.ok().body(resp);
 	}
 	
-	
+	@PostMapping("/consultaEstatusOrden")
+	@ApiOperation(value = "Método para consultar el estatus en el que se encuentra la orden de compra", response = EstatusOrdenResponse.class)
+	@ApiResponses(value = {@ApiResponse(code = 200, message = "Retorna el objeto EstatusOrdenResponse.")})
+	public ResponseEntity<?>estatusOrdenCompra(@ApiParam(value = "Estatus de la orden", required = true) @Valid @RequestBody EstatusOrdenIn estatusOrdenIn){
+		log.info("Execute Method Post---> Consulta Estatus Orden Compra" + estatusOrdenIn);
+		
+		EstatusOrdenResponse resp = ventasMarketplaceServiceImpl.consultaEstatusOrdenMarketplace(estatusOrdenIn);
+		
+		return ResponseEntity.ok().body(resp);
+	}
 }
