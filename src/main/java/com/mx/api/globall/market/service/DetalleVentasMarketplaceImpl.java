@@ -6,9 +6,8 @@ import org.springframework.stereotype.Service;
 import com.mx.api.globall.market.model.DetalleVentaMarketplace;
 import com.mx.api.globall.market.repository.IDetalleVentasMarketplaceRepository;
 
-
 @Service
-public class DetalleVentasCareboxServiceImpl implements IDetalleVentasMarketplaceService {
+public class DetalleVentasMarketplaceImpl implements IDetalleVentasMarketplaceService {
 
 	@Autowired
 	IDetalleVentasMarketplaceRepository detVentaRepo;
@@ -19,7 +18,7 @@ public class DetalleVentasCareboxServiceImpl implements IDetalleVentasMarketplac
 	}
 
 	@Override
-	public DetalleVentaMarketplace findByIdVentaMarketplaceAndEstatus(Integer idVentaCare, Integer estatus) {		
+	public DetalleVentaMarketplace findByIdVentaMarketAndEstatus(Integer idVentaCare, Integer estatus) {		
 		return detVentaRepo.findByIdVentaMarketAndEstatus(idVentaCare, estatus);
 	}
 	

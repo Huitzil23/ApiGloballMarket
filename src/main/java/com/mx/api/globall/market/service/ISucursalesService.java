@@ -14,7 +14,7 @@ public interface ISucursalesService {
 	BuscaSucursalCodigoPostalResponse consultaSucursalesByCodigoPostalAndEstatus(String codigoPostal, Integer estatus);
 	List<Object> findSucursalProductoByCodigoPostal(String codigoPostal);
 	List<ConsultaSucursalesProductosResponse>buscaSucursalesProductosByCodigoPostal(String codigoPostal);
-	List<Object> findIdSucursalesCercaCPDistancia(String codigoPostal, String latitud, String longitud, float distancia);
+	List<Object> findIdSucursalesCercaCPDistancia(String latitud, String longitud, float distancia);
 	List<ConsultaSucursalesProductosResponse> buscaIdSucursalesCercaCPDistancia(ConsultaSucursalesProductosRequest ConsultaSucursalesProductosRequest, float distancia);
 	
 	List<Object> findArticulosByIdSucursalAndIdCompuestoActivo(Integer idSucursal, List<String> lstCompuestosActivos);

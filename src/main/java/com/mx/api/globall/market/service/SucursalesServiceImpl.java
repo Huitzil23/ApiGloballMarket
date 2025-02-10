@@ -70,8 +70,8 @@ public class SucursalesServiceImpl implements ISucursalesService{
 	}
 
 	@Override
-	public List<Object> findIdSucursalesCercaCPDistancia(String codigoPostal, String latitud, String longitud, float distancia) {		
-		return sucursalesRepository.findIdSucursalesCercaCPDistancia(codigoPostal, latitud, longitud, distancia);
+	public List<Object> findIdSucursalesCercaCPDistancia(String latitud, String longitud, float distancia) {		
+		return sucursalesRepository.findIdSucursalesCercaCPDistancia(latitud, longitud, distancia);
 	}
 
 	@Override
@@ -82,7 +82,7 @@ public class SucursalesServiceImpl implements ISucursalesService{
 		String latitud = consultaSucursalesProductosRequest.getLatitudPaciente();
 		String longitud = consultaSucursalesProductosRequest.getLongitudPaciente();
 		System.out.println("Lista id compuesto activo " + consultaSucursalesProductosRequest.getCompuestosActivos().toString());
-		lstObj = findIdSucursalesCercaCPDistancia(cp, latitud, longitud, distancia);
+		lstObj = findIdSucursalesCercaCPDistancia(latitud, longitud, distancia);
 		for(Object object:lstObj) {
 			Object[]obj = (Object[])object;
 			SucursalesAux scAuc = new SucursalesAux();
@@ -123,6 +123,8 @@ public class SucursalesServiceImpl implements ISucursalesService{
 					prd.setDescripcion((obj[1] != null ? (String)obj[1] : ""));
 					prd.setPrecioPublico((obj[2] != null ? (BigDecimal)obj[2] : new BigDecimal(0)));
 					prd.setExistencia((obj[3] != null ? (Integer)obj[3] : 0));
+					prd.setRequiereReceta((obj[6] != null ? Boolean.valueOf(obj[6].toString()) : false));
+					prd.setEsControlado((obj[8] != null ? Boolean.valueOf(obj[8].toString()): false));
 					lstPrd.add(prd);	
 					
 					csRs.setIdSucursal(lstIdSuc.get(i).getIdSucursal());					

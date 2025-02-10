@@ -18,5 +18,7 @@ public class Productos {
 	private String descripcion;
 	private int existencia;	
 	private BigDecimal PrecioPublico;
+	private Boolean requiereReceta;
+	private Boolean esControlado;
 
 }

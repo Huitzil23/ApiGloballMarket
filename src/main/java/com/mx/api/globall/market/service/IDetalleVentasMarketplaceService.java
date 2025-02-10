@@ -5,6 +5,6 @@ import com.mx.api.globall.market.model.DetalleVentaMarketplace;
 public interface IDetalleVentasMarketplaceService {
 
 	DetalleVentaMarketplace save(DetalleVentaMarketplace detVentaMarketplaceBox);
-	DetalleVentaMarketplace findByIdVentaMarketplaceAndEstatus(Integer idVentaMarketplace, Integer estatus);	
+	DetalleVentaMarketplace findByIdVentaMarketAndEstatus(Integer idVentaMarketplace, Integer estatus);	
 	
 }
