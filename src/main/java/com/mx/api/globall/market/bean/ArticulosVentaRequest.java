@@ -22,6 +22,9 @@ public class ArticulosVentaRequest {
 	@JsonProperty(value = "idSucursal", required = true)
 	private Integer idSucursal;
 	
+	@JsonProperty(value = "idPaciente", required = true)
+	private Integer idPaciente;
+	
 	@JsonProperty(value="articulos", required = true)
 	private List<ArticulosVentaAuxIn> articulos;
 	

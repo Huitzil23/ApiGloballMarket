@@ -9,6 +9,7 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -51,6 +52,9 @@ public class IntegracionGloballMarketController {
 	@Autowired
 	private VentasMarketplaceServiceImpl ventasMarketplaceServiceImpl;
 	
+	@Value("${app.general.rango.distancia.marketplace}")
+    private float rangoDistanciaConsulta;
+	
 	/*@PostMapping("/consultaSales")
 	@ApiOperation(value="EndPoint Consulta de Sales", response = ConsultaSalesResponse.class)
 	@ApiResponses(value = {
@@ -78,7 +82,7 @@ public class IntegracionGloballMarketController {
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Retorna objeto BuscaSucursalCodigoPostalResponse") })
 	public ResponseEntity<?> buscaSucursalesProductosByCodigoPostal(@ApiParam(value = "Datos de la busqueda",required = true) @Valid @RequestBody ConsultaSucursalesProductosRequest consultaSucursalesProductosRequest ) {
 		List<ConsultaSucursalesProductosResponse> resp = new ArrayList<ConsultaSucursalesProductosResponse>();		
-		resp = sucursalesServices.buscaIdSucursalesCercaCPDistancia(consultaSucursalesProductosRequest, 3.0f);
+		resp = sucursalesServices.buscaIdSucursalesCercaCPDistancia(consultaSucursalesProductosRequest, rangoDistanciaConsulta);
 		return ResponseEntity.ok().body(resp);
 	}
 	

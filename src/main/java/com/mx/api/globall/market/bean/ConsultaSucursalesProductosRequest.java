@@ -21,7 +21,8 @@ public class ConsultaSucursalesProductosRequest {
 	@JsonProperty(value="codigoPostalPaciente", required = true)
 	@NotNull 
 	@NotEmpty
-	private String codigoPostalPaciente;
+	private String codigoPostalPaciente;	
+	
 	
 	@JsonProperty(value="latitudPaciente", required = true)
 	@NotNull 
@@ -32,6 +33,9 @@ public class ConsultaSucursalesProductosRequest {
 	@NotNull 
 	@NotEmpty
 	private String longitudPaciente;
+	
+	@JsonProperty(value="informacionPaciente", required = true)
+	InformacionPacienteRequest informacionPaciente;
 	
 	@JsonProperty(value="compuestosActivos", required = true)	
 	List<CompuestoActivoRequest>compuestosActivos;

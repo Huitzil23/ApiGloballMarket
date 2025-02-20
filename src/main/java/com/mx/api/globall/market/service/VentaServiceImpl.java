@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -71,6 +72,19 @@ public class VentaServiceImpl implements IVentaService{
 	
 	@Autowired
 	IDetalleVentasMarketplaceService detVtaMarketplaceService;
+	
+	@Autowired
+	IClienteMarketplaceService iClienteMarketplaceService;
+	
+	@Value("${app.general.id.marketplace.beep}")
+    private Integer idMarketplaceBeep;
+	
+	@Value("${app.general.nombre.marketplace.beep}")
+    private String nombreMarketplaceBeep;
+	
+	@Value("${app.general.id.usuario.creacion}")
+    private Integer idUsuarioCreacion;
+	
 		
 	@Override
 	public Venta findById(Integer idVenta) {
@@ -102,9 +116,10 @@ public class VentaServiceImpl implements IVentaService{
 		int numArt = 0;
 		int idVenta = 0;
 		//int idSucursal = 0;
-		
+		int idClienteMarketplace = iClienteMarketplaceService.findIdClienteByNombreCliente(nombreMarketplaceBeep);
 		for(ArticulosVentaAuxIn artIn :  lstArt) {
 			numArt++;
+			
 			logger.info(jsonArt);
 			logger.info("IdSucursal  = " + articulosVentaRequest.getIdSucursal());
 			logger.info("cantidad  = " + artIn.getCantidad());
@@ -114,7 +129,7 @@ public class VentaServiceImpl implements IVentaService{
 			venta.setIdSucursal(articulosVentaRequest.getIdSucursal());
 			venta.setClaveArticulo(artIn.getSku());
 			venta.setCantidad(artIn.getCantidad());			
-			venta.setUsuarioCreacion(0);
+			venta.setUsuarioCreacion(idUsuarioCreacion);
 			Articulos objArt = articulosService.consultaArticulo(artIn.getSku(),articulosVentaRequest.getIdSucursal());
 			
 			//venta.setSubTotal(null)
@@ -142,7 +157,7 @@ public class VentaServiceImpl implements IVentaService{
 	    	//int valCte = venta.getIdCliente();
 	    	int valCte = 1;
 	    	venta.setIsDeliv(valCte == 2 ? 1 : valCte == 3 ? 1 : valCte == 4 ? 1 : valCte == 5 ? 1 : valCte == 6 ? 1 : 0);
-	    	venta.setIdCliente(valCte);
+	    	venta.setIdCliente(idClienteMarketplace);
 	    	venta.setIdTerminal(1);
 	    	venta.setIdCorteCaja(1);
 	    	
@@ -162,11 +177,11 @@ public class VentaServiceImpl implements IVentaService{
 		iSseNotifyService.sendNotify(String.valueOf(articulosVentaRequest.getIdSucursal()), "Nueva orden de venta");
 		VentaMarketplace ventaMarket = new VentaMarketplace();
 		ventaMarket.setIdVenta(idVenta);
-		ventaMarket.setIdMarketplace(1);
+		ventaMarket.setIdMarketplace(idMarketplaceBeep);
 		ventaMarket.setIdSucursal(articulosVentaRequest.getIdSucursal());
-		ventaMarket.setIdCliente(0);
+		ventaMarket.setIdCliente(articulosVentaRequest.getIdPaciente());
 		ventaMarket.setEstatus(EstatusMarketplace.Recibido.getValue());
-		ventaMarket.setUsuarioCreacion("0");
+		ventaMarket.setUsuarioCreacion(String.valueOf(idClienteMarketplace));
 		ventaMarket.setFechaCreacion(new Date());    	
 		@SuppressWarnings("unused")
 		VentaMarketplace resSaveCareBox =  marketplaceService.save(ventaMarket);
@@ -176,7 +191,7 @@ public class VentaServiceImpl implements IVentaService{
 		detVta.setIdVentaMarket(resSaveCareBox.getIdVentaMarket());		
     	detVta.setEstatus(EstatusMarketplace.Recibido.getValue());
     	detVta.setFechaCreacion(new Date());
-    	detVta.setUsuarioCreacion("0");
+    	detVta.setUsuarioCreacion(String.valueOf(idClienteMarketplace));
     	detVtaMarketplaceService.save(detVta);
 		
 		

@@ -3,9 +3,11 @@ package com.mx.api.globall.market.service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.mx.api.globall.market.bean.BuscaSucursalCodigoPostalResponse;
@@ -13,7 +15,9 @@ import com.mx.api.globall.market.bean.ConsultaSucursalesProductosRequest;
 import com.mx.api.globall.market.bean.ConsultaSucursalesProductosResponse;
 import com.mx.api.globall.market.bean.Productos;
 import com.mx.api.globall.market.bean.SucursalesAux;
+import com.mx.api.globall.market.model.ClienteMarketplace;
 import com.mx.api.globall.market.model.Sucursales;
+import com.mx.api.globall.market.repository.IClienteMarketplaceRepository;
 import com.mx.api.globall.market.repository.ISucursalesRepository;
 
 @Service
@@ -21,6 +25,14 @@ public class SucursalesServiceImpl implements ISucursalesService{
 	
 	@Autowired
 	ISucursalesRepository sucursalesRepository;
+	
+	@Autowired
+	IClienteMarketplaceRepository clienteRepo;
+	
+	@Value("${app.general.id.marketplace.beep}")
+    private Integer idMarketplaceBeep;
+		
+	private final Integer ACTIVO = 1;
 
 	@Override
 	public List<Sucursales> findByCodigoPostalAndEstatus(String codigoPostal, Integer estatus) {	
@@ -31,7 +43,7 @@ public class SucursalesServiceImpl implements ISucursalesService{
 	public BuscaSucursalCodigoPostalResponse consultaSucursalesByCodigoPostalAndEstatus(String codigoPostal,
 			Integer estatus) {
 		List<Sucursales> lstSucursales = new ArrayList<Sucursales>();
-		BuscaSucursalCodigoPostalResponse bscSucCodResponse = new BuscaSucursalCodigoPostalResponse();
+		BuscaSucursalCodigoPostalResponse bscSucCodResponse = new BuscaSucursalCodigoPostalResponse();		
 		lstSucursales = sucursalesRepository.findByCodigoPostalAndEstatus(codigoPostal, estatus);
 		if(lstSucursales.size() > 0) {
 			bscSucCodResponse.setCode(201);
@@ -83,6 +95,48 @@ public class SucursalesServiceImpl implements ISucursalesService{
 		String latitud = consultaSucursalesProductosRequest.getLatitudPaciente();
 		String longitud = consultaSucursalesProductosRequest.getLongitudPaciente();
 		System.out.println("Lista id compuesto activo " + consultaSucursalesProductosRequest.getCompuestosActivos().toString());
+		
+		
+		
+		
+		if(consultaSucursalesProductosRequest.getInformacionPaciente() != null) {
+			ClienteMarketplace validaCliente = clienteRepo.findIdClienteMarketByIdMarketplaceAndIdClienteExterno(idMarketplaceBeep, 
+					Integer.parseInt(consultaSucursalesProductosRequest.getInformacionPaciente().getIdPaciente()));
+			ClienteMarketplace clienteSave = new ClienteMarketplace();
+			if(validaCliente != null && validaCliente.getIdClienteMarket() != null) {
+				clienteSave.setIdClienteMarket(validaCliente.getIdClienteMarket());
+				clienteSave.setUsuarioCreacion(validaCliente.getUsuarioCreacion());
+				clienteSave.setFechaCreacion(validaCliente.getFechaCreacion());	
+				clienteSave.setUsuarioModificacion(String.valueOf(idMarketplaceBeep));
+				clienteSave.setFechaModificacion(new Date());
+				
+			}else {
+				clienteSave.setUsuarioCreacion(String.valueOf(idMarketplaceBeep));
+				clienteSave.setFechaCreacion(new Date());	
+			}
+			
+			clienteSave.setIdMarketplace(idMarketplaceBeep);
+			clienteSave.setIdClienteExterno(Integer.parseInt(consultaSucursalesProductosRequest.getInformacionPaciente().getIdPaciente()));
+			clienteSave.setNombreCliente(consultaSucursalesProductosRequest.getInformacionPaciente().getNombre());
+			clienteSave.setApellidoPaterno(consultaSucursalesProductosRequest.getInformacionPaciente().getApellidoPaterno());
+			clienteSave.setApellidoMaterno(consultaSucursalesProductosRequest.getInformacionPaciente().getApellidoMaterno());
+			clienteSave.setTelefono(consultaSucursalesProductosRequest.getInformacionPaciente().getTelefono());
+			clienteSave.setCalle(consultaSucursalesProductosRequest.getInformacionPaciente().getCalle());
+			clienteSave.setNumExterior(consultaSucursalesProductosRequest.getInformacionPaciente().getNumeroExterior());
+			clienteSave.setNumInterior(consultaSucursalesProductosRequest.getInformacionPaciente().getNumeroInterior());
+			clienteSave.setColonia(consultaSucursalesProductosRequest.getInformacionPaciente().getColonia());
+			clienteSave.setMunicipioDelegacion(consultaSucursalesProductosRequest.getInformacionPaciente().getMunicipioDelegacion());
+			clienteSave.setEstado(consultaSucursalesProductosRequest.getInformacionPaciente().getEstado());
+			clienteSave.setCodigoPostal(cp);
+			clienteSave.setLatitud(latitud);
+			clienteSave.setLongitud(longitud);
+			clienteSave.setEstatus(ACTIVO);
+					
+			
+			clienteSave = clienteRepo.save(clienteSave);
+		}
+		
+		
 		lstObj = findIdSucursalesCercaCPDistancia(latitud, longitud, distancia);
 		for(Object object:lstObj) {
 			Object[]obj = (Object[])object;
