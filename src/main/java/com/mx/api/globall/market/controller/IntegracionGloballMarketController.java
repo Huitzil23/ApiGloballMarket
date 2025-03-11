@@ -24,6 +24,7 @@ import com.mx.api.globall.market.bean.OrdenCompraResponse;
 import com.mx.api.globall.market.bean.ResponseMessage;
 import com.mx.api.globall.market.bean.ArticulosVentaRequest;
 import com.mx.api.globall.market.bean.BuscaSucursalCodigoPostalResponse;
+import com.mx.api.globall.market.bean.ConsultaSucursalesByClaveArticuloRequest;
 import com.mx.api.globall.market.service.ISucursalesService;
 import com.mx.api.globall.market.service.VentaServiceImpl;
 import com.mx.api.globall.market.service.VentasMarketplaceServiceImpl;
@@ -104,6 +105,26 @@ public class IntegracionGloballMarketController {
 		log.info("Execute Method Post---> Consulta Estatus Orden Compra" + estatusOrdenIn);
 		
 		EstatusOrdenResponse resp = ventasMarketplaceServiceImpl.consultaEstatusOrdenMarketplace(estatusOrdenIn);
+		
+		return ResponseEntity.ok().body(resp);
+	}
+	
+	@PostMapping("/buscaSucursalesProductosByCodigoPostalAndSku")
+	@ApiOperation(value = "EndPoint Busca Sucursales con inventario por Código Postal y SKU", response = BuscaSucursalCodigoPostalResponse.class)
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Retorna objeto BuscaSucursalCodigoPostalResponse") })
+	public ResponseEntity<?> buscaSucursalesProductosByCodigoPostalAndSku(@ApiParam(value = "Datos de la busqueda",required = true) @Valid @RequestBody ConsultaSucursalesByClaveArticuloRequest consultaSucursalesByClaveArticuloRequest ) {
+		List<ConsultaSucursalesProductosResponse> resp = new ArrayList<ConsultaSucursalesProductosResponse>();		
+		resp = sucursalesServices.buscaIdSucursalesCercaCPDistanciaClaveArticulo(consultaSucursalesByClaveArticuloRequest, rangoDistanciaConsulta);
+		return ResponseEntity.ok().body(resp);
+	}
+	
+	@PostMapping("/actualizaEstatusOrdenRecibida")
+	@ApiOperation(value = "Método para actualizar el estatus de la orden de compra a recibida", response = EstatusOrdenResponse.class)
+	@ApiResponses(value = {@ApiResponse(code = 200, message = "Retorna el objeto EstatusOrdenResponse.")})
+	public ResponseEntity<?>actualizaEstatusOrdenCompra(@ApiParam(value = "Estatus de la orden", required = true) @Valid @RequestBody EstatusOrdenIn estatusOrdenIn){
+		log.info("Execute Method Post---> Consulta Estatus Orden Compra" + estatusOrdenIn);
+		
+		EstatusOrdenResponse resp = ventasMarketplaceServiceImpl.actualizaEstatusOrdenRecibido(estatusOrdenIn);
 		
 		return ResponseEntity.ok().body(resp);
 	}

@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.mx.api.globall.market.bean.ConsultaDetalleArticulos;
+//import com.mx.api.globall.market.bean.ConsultaDetalleArticulos;
 import com.mx.api.globall.market.model.Articulos;
 import com.mx.api.globall.market.model.ArticulosId;
 

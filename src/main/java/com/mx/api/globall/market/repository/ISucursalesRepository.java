@@ -74,4 +74,19 @@ public interface ISucursalesRepository extends JpaRepository<Sucursales, Integer
 			+ " ORDER BY AC.IdCompuestoActivo "			
 			,nativeQuery = true)
 	List<Object> findArticulosByIdSucursalAndIdCompuestoActivo(Integer idSucursal, List<String> lstCompuestoActivo);
+	
+	
+	@Query(value = "SELECT A.ClaveArticulo, A.Nombre, A.PrecioPublico, I.ExistenciaFisica, AC.IdCompuestoActivo, "
+			+ " A.Receta, (CASE WHEN A.Receta = 1 THEN 'true' ELSE 'false' END ) AS RecetaMax, "
+			+ " A.IdGrupoSSA, (CASE WHEN A.IdGrupoSSA = 1 OR A.IdGrupoSSA = 2 OR A.IdGrupoSSA = 3 THEN 'true' ELSE 'false' END) AS ControladoMax  "
+			+ " FROM tbc_GTC_Articulos A "
+			+ " INNER JOIN tbc_GTC_Inventario I ON A.IdSucursal = I.IdSucursal "
+			+ " LEFT JOIN tbc_GTC_ArticulosCompuestoActivo AC ON AC.IdSucursal = A.IdSucursal  "
+			+ " AND AC.ClaveArticulo = A.ClaveArticulo "
+			+ " WHERE A.IdSucursal = ?1 "
+			+ " AND A.ClaveArticulo IN (?2) "
+			+ " AND A.ClaveArticulo = I.ClaveArticulo "			
+			,nativeQuery = true)
+	List<Object> findArticulosByIdSucursalAndClaveArticulo(Integer idSucursal, List<String> lstClaveArticulo);
+
 }

@@ -12,7 +12,7 @@ public interface IControlVentasMarketplaceService {
 
 	//List<ArticulosVentaCareBoxAux> getArticulosVentaCareBox(Integer idSucursal, Integer idVenta, Integer estatus);
 
-	VentaMarketplace save(VentaMarketplace ventaCareBox);
+	VentaMarketplace save(VentaMarketplace ventaMarketplace);
 
 	Object findClienteByIdSucursalAndIdVenta(Integer idSucursal, Integer idVenta);
 

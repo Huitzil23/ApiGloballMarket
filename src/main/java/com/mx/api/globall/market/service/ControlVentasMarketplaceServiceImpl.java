@@ -46,8 +46,8 @@ public class ControlVentasMarketplaceServiceImpl implements IControlVentasMarket
 	}*/
 
 	@Override
-	public VentaMarketplace save(VentaMarketplace ventaCareBox) {		
-		return ventaRepo.save(ventaCareBox);
+	public VentaMarketplace save(VentaMarketplace ventaMarketplace) {		
+		return ventaRepo.save(ventaMarketplace);
 	}
 
 	@Override

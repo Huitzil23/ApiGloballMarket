@@ -5,7 +5,8 @@ public enum EstatusMarketplace {
 	Aceptado(1),
 	Procesando(2),
 	EnCamino(3),
-	Entregado(4);
+	Entregado(4),
+	EsperaConfirmacion(99);
     
 	private Integer value;
 	

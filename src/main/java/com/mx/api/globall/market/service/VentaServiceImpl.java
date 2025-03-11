@@ -63,10 +63,7 @@ public class VentaServiceImpl implements IVentaService{
 	
 	@Autowired
 	IArticulosService articulosService;
-	
-	@Autowired
-	ISseNotifyService iSseNotifyService;
-	
+		
 	@Autowired
 	private IControlVentasMarketplaceService marketplaceService;
 	
@@ -173,14 +170,13 @@ public class VentaServiceImpl implements IVentaService{
 	    	
 		}
 		
-		//Registro de estatus y Envio de notificación
-		iSseNotifyService.sendNotify(String.valueOf(articulosVentaRequest.getIdSucursal()), "Nueva orden de venta");
+		//Registro de estatus y Envio de notificación		
 		VentaMarketplace ventaMarket = new VentaMarketplace();
 		ventaMarket.setIdVenta(idVenta);
 		ventaMarket.setIdMarketplace(idMarketplaceBeep);
 		ventaMarket.setIdSucursal(articulosVentaRequest.getIdSucursal());
 		ventaMarket.setIdCliente(articulosVentaRequest.getIdPaciente());
-		ventaMarket.setEstatus(EstatusMarketplace.Recibido.getValue());
+		ventaMarket.setEstatus(EstatusMarketplace.EsperaConfirmacion.getValue());
 		ventaMarket.setUsuarioCreacion(String.valueOf(idClienteMarketplace));
 		ventaMarket.setFechaCreacion(new Date());    	
 		@SuppressWarnings("unused")
@@ -189,7 +185,7 @@ public class VentaServiceImpl implements IVentaService{
 		DetalleVentaMarketplace detVta = new DetalleVentaMarketplace();
 		detVta.setIdMarketplace(1);
 		detVta.setIdVentaMarket(resSaveCareBox.getIdVentaMarket());		
-    	detVta.setEstatus(EstatusMarketplace.Recibido.getValue());
+    	detVta.setEstatus(EstatusMarketplace.EsperaConfirmacion.getValue());
     	detVta.setFechaCreacion(new Date());
     	detVta.setUsuarioCreacion(String.valueOf(idClienteMarketplace));
     	detVtaMarketplaceService.save(detVta);
