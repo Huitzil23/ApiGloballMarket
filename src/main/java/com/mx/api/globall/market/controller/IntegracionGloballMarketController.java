@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mx.api.globall.market.bean.ConsultaSucursalesProductosRequest;
 import com.mx.api.globall.market.bean.ConsultaSucursalesProductosResponse;
+import com.mx.api.globall.market.bean.ConsultaVentasBeepResponse;
 import com.mx.api.globall.market.bean.EstatusOrdenIn;
 import com.mx.api.globall.market.bean.EstatusOrdenResponse;
 import com.mx.api.globall.market.bean.OrdenCompraResponse;
@@ -125,6 +127,16 @@ public class IntegracionGloballMarketController {
 		log.info("Execute Method Post---> Consulta Estatus Orden Compra" + estatusOrdenIn);
 		
 		EstatusOrdenResponse resp = ventasMarketplaceServiceImpl.actualizaEstatusOrdenRecibido(estatusOrdenIn);
+		
+		return ResponseEntity.ok().body(resp);
+	}
+	
+	@GetMapping("/consultaVentasRealizadas")
+	@ApiOperation(value = "Método para consultar las ventas realizadas por Bepp", response = ConsultaVentasBeepResponse.class)
+	@ApiResponses(value = {@ApiResponse(code = 200, message = "Retorna el objeto ConsultaVentasBeepResponse.")})
+	public ResponseEntity<?>consultaVentasRealizadas(){		
+		
+		List<ConsultaVentasBeepResponse> resp = ventasMarketplaceServiceImpl.consultaVentasByNombreMarketplace();
 		
 		return ResponseEntity.ok().body(resp);
 	}

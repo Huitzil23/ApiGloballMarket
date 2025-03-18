@@ -11,4 +11,5 @@ public interface ICatalogoPlataformasMarketplaceService {
 
 	List<CatalogoPlataformasMarketplace>findAllByEstatus(Integer estatus);
 	CatalogoPlataformasMarketplace findAllByApiKeyAndEstatus(String apiKeyMarket, Integer estatus);
+	CatalogoPlataformasMarketplace findIdMarketplaceByNombreMarketplace(String nombreMarketPlace);
 }

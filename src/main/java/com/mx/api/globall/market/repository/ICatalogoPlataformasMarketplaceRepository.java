@@ -12,4 +12,5 @@ public interface ICatalogoPlataformasMarketplaceRepository extends JpaRepository
 
 	List<CatalogoPlataformasMarketplace> findAllByEstatus(Integer estatus);
 	CatalogoPlataformasMarketplace findAllByApiKeyAndEstatus(String apiKeyMarket, Integer estatus);
+	CatalogoPlataformasMarketplace findIdMarketplaceByNombreMarketplace(String nombreMarketPlace);
 }

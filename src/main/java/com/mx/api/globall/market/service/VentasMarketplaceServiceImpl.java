@@ -1,15 +1,23 @@
 package com.mx.api.globall.market.service;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.mx.api.globall.market.bean.ConsultaVentasBeepResponse;
 import com.mx.api.globall.market.bean.EstatusOrdenIn;
 import com.mx.api.globall.market.bean.EstatusOrdenResponse;
+import com.mx.api.globall.market.bean.ProductosVentas;
 import com.mx.api.globall.market.model.VentaMarketplace;
+import com.mx.api.globall.market.repository.ICatalogoPlataformasMarketplaceRepository;
 import com.mx.api.globall.market.repository.IVentaMarketplaceRepository;
 import com.mx.api.globall.market.utils.EstatusMarketplace;
+import com.mx.api.globall.market.model.CatalogoPlataformasMarketplace;
 import com.mx.api.globall.market.model.DetalleVentaMarketplace;
 
 @Service
@@ -26,6 +34,15 @@ public class VentasMarketplaceServiceImpl implements IVentasMarketplaceService{
 	
 	@Autowired
 	ISseNotifyService iSseNotifyService;
+	
+	@Autowired
+	IClienteMarketplaceService iClienteMarketplaceService;
+	
+	@Autowired
+	ICatalogoPlataformasMarketplaceRepository plataformasRepository;
+	
+	@Value("${app.general.nombre.marketplace.beep}")
+    private String nombreMarketplaceBeep;
 
 	@Override
 	public VentaMarketplace findEstatusByIdSucursalAndIdVenta(Integer idSucursal, Integer idVenta) {
@@ -79,7 +96,7 @@ public class VentasMarketplaceServiceImpl implements IVentasMarketplaceService{
 			updateVentaMarket.setEstatus(EstatusMarketplace.Recibido.getValue());    		
 			controlMarketplace.save(updateVentaMarket);
 			
-			com.mx.api.globall.market.model.DetalleVentaMarketplace detVta = new DetalleVentaMarketplace();
+			DetalleVentaMarketplace detVta = new DetalleVentaMarketplace();
 	    	detVta.setIdVentaMarket(updateVentaMarket.getIdVentaMarket());
 	    	detVta.setIdMarketplace(updateVentaMarket.getIdMarketplace());
 	    	detVta.setEstatus(EstatusMarketplace.Recibido.getValue());
@@ -94,6 +111,61 @@ public class VentasMarketplaceServiceImpl implements IVentasMarketplaceService{
 		}		
 		
 		return estatusOrdenResponse;
+	}
+
+	
+	
+	@Override
+	public List<Object> findVentasByIdMarketplace(Integer idMarketplace) {		
+		return iVentaMarketplaceRepository.findVentasByIdMarketplace(idMarketplace);
+	}
+	
+	public List<ConsultaVentasBeepResponse> consultaVentasByNombreMarketplace() {
+		List<ConsultaVentasBeepResponse> lstVentas = new ArrayList<ConsultaVentasBeepResponse>();
+		CatalogoPlataformasMarketplace catalogoPlataformasMarketplace = plataformasRepository.findIdMarketplaceByNombreMarketplace("Bepp");
+		
+		if(catalogoPlataformasMarketplace != null) {
+			List<Object> lstObject = findVentasByIdMarketplace(catalogoPlataformasMarketplace.getIdMarketplace());
+			ConsultaVentasBeepResponse cnVentas = new ConsultaVentasBeepResponse();
+			
+			List<ProductosVentas> lstProd = new ArrayList<ProductosVentas>();
+			int idVen = 0;
+			for (Object ob : lstObject) {
+				Object[] obj = (Object[]) ob;
+				cnVentas = new ConsultaVentasBeepResponse();
+				int idSucursal = obj[0] != null ? (Integer) obj[0] : 0;
+				int IdVenta = obj[1] != null ? (Integer) obj[1] : 0;
+				if(idVen != IdVenta) {
+					cnVentas.setIdSucursal(idSucursal);
+					cnVentas.setIdVenta(IdVenta);
+					cnVentas.setIdCliente(obj[2] != null ? (Integer) obj[2] : 0);
+					cnVentas.setTotalVenta(obj[3] != null ? (BigDecimal) obj[3] : new BigDecimal(0));
+					
+					lstProd = new ArrayList<ProductosVentas>();
+					List<Object> lstObjProd = findDetalleVentasByIdSucursalAndIdVenta(idSucursal, IdVenta);
+					for (Object objProd : lstObjProd) {
+						Object[] objP = (Object[]) objProd;
+						ProductosVentas proVen = new ProductosVentas();						
+						proVen.setIdVenta(objP[0] != null ? (Integer) objP[0] : 0);
+						proVen.setSku((objP[1] != null ? (String) objP[1] : ""));
+						proVen.setNombre((objP[2] != null ? (String) objP[2] : ""));
+						proVen.setPrecioVenta(objP[3] != null ? (BigDecimal) objP[3] : new BigDecimal(0));
+						proVen.setCantidad(objP[4] != null ? (Integer) objP[4] : 0);
+						lstProd.add(proVen);
+					}
+					cnVentas.setProductos(lstProd);
+					lstVentas.add(cnVentas);
+				}
+				idVen = IdVenta;			
+			}
+		}	
+		
+		return lstVentas;
+	}
+
+	@Override
+	public List<Object> findDetalleVentasByIdSucursalAndIdVenta(Integer idSucursal, Integer idVenta) {		
+		return iVentaMarketplaceRepository.findDetalleVentasByIdSucursalAndIdVenta(idSucursal, idVenta);
 	}
 
 }

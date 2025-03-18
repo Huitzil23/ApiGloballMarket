@@ -24,4 +24,9 @@ public class CatalogoPlataformasMarketplaceServiceImpl implements ICatalogoPlata
 		return catPlataformasRepo.findAllByApiKeyAndEstatus(apiKeyMarket, estatus);
 	}
 
+	@Override
+	public CatalogoPlataformasMarketplace findIdMarketplaceByNombreMarketplace(String nombreMarketPlace) {		
+		return catPlataformasRepo.findIdMarketplaceByNombreMarketplace(nombreMarketPlace);
+	}
+
 }
