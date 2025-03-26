@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.mx.api.globall.market.bean.BuscaSucursalCodigoPostalResponse;
+import com.mx.api.globall.market.bean.ClaveArticulosRequest;
 import com.mx.api.globall.market.bean.ConsultaSucursalesByClaveArticuloRequest;
 import com.mx.api.globall.market.bean.ConsultaSucursalesProductosRequest;
 import com.mx.api.globall.market.bean.ConsultaSucursalesProductosResponse;
@@ -203,6 +204,7 @@ public class SucursalesServiceImpl implements ISucursalesService{
 		return lstConsulta;
 	}
 	
+	@SuppressWarnings("unused")
 	@Override
 	public List<ConsultaSucursalesProductosResponse> buscaIdSucursalesCercaCPDistanciaClaveArticulo(ConsultaSucursalesByClaveArticuloRequest consultaSucursalesByClaveArticuloRequest, float distancia) {
 		List<SucursalesAux>lstIdSuc = new ArrayList<SucursalesAux>();
@@ -280,8 +282,58 @@ public class SucursalesServiceImpl implements ISucursalesService{
 		
 		List<ConsultaSucursalesProductosResponse>lstConsulta = new ArrayList<ConsultaSucursalesProductosResponse>();
 		for(int i=0; i < lstIdSuc.size(); i++) {
+			//System.out.println("Sucursal a buscar: "+lstIdSuc.get(i).getIdSucursal() + " - " +lstIdSuc.get(i).getNombreSucursal());
+			
+			//
+			ConsultaSucursalesProductosResponse csRs = new ConsultaSucursalesProductosResponse();
+			List<Productos> lstPrd = new ArrayList<Productos>();
+			csRs.setIdSucursal(lstIdSuc.get(i).getIdSucursal());					
+			csRs.setCodigoPostal(lstIdSuc.get(i).getCodigoPostal());
+			csRs.setNombreComercio(lstIdSuc.get(i).getNombreComercio());
+			csRs.setNombreSucursal(lstIdSuc.get(i).getNombreSucursal());
+			csRs.setCalle(lstIdSuc.get(i).getCalle());
+			csRs.setNumeroExterior(lstIdSuc.get(i).getNumeroExterior());
+			csRs.setColonia(lstIdSuc.get(i).getColonia());
+			csRs.setMunicipioDelegacion(lstIdSuc.get(i).getMunicipioDelegacion());
+			csRs.setEstado(lstIdSuc.get(i).getEstado());
+			csRs.setPais(lstIdSuc.get(i).getPais());		
+			//
+			
+			boolean cuentaConexistencias =  false;
+			for (ClaveArticulosRequest articulosCantidad : consultaSucursalesByClaveArticuloRequest.getClavesArticulos()) {
+				
+				//System.out.println("sku: "+articulosCantidad.getSku() + " cantidad: " +articulosCantidad.getCantidad());
+				List<Object> lstOb = findArticulosByIdSucursalAndClaveArticuloValidCantidad(lstIdSuc.get(i).getIdSucursal(), articulosCantidad.getSku(), articulosCantidad.getCantidad());
+				
+				if(lstOb != null && lstOb.size() > 0) {
+					cuentaConexistencias = true;
+			
+					for(Object ob: lstOb) {
+						Object[]obj = (Object[])ob;					
+						Productos prd = new Productos();					
+						prd.setSku((obj[0] != null ? (String)obj[0] : ""));
+						prd.setNombre((obj[1] != null ? (String)obj[1] : ""));
+						prd.setDescripcion((obj[1] != null ? (String)obj[1] : ""));
+						prd.setPrecioPublico((obj[2] != null ? (BigDecimal)obj[2] : new BigDecimal(0)));
+						prd.setExistencia((obj[3] != null ? (Integer)obj[3] : 0));
+						prd.setRequiereReceta((obj[6] != null ? Boolean.valueOf(obj[6].toString()) : false));
+						prd.setEsControlado((obj[8] != null ? Boolean.valueOf(obj[8].toString()): false));
+						lstPrd.add(prd);
+					}
+				}else {
+					cuentaConexistencias = false;
+					break;
+				}
+			}
+			if(cuentaConexistencias) {
+				//System.out.println("La sucursal " +lstIdSuc.get(i).getIdSucursal() + " si cuenta con existencia, si se muestra en response");
+				csRs.setProductos(lstPrd);
+				lstConsulta.add(csRs);
+			}else {
+				System.out.println("La sucursal " +lstIdSuc.get(i).getIdSucursal() + " NO cuenta con las existencias solicitadas");
+			}
 		
-			List<Object>lstOb = findArticulosByIdSucursalAndClaveArticulo(lstIdSuc.get(i).getIdSucursal(), lstClaveArt);
+			/*List<Object>lstOb = findArticulosByIdSucursalAndClaveArticulo(lstIdSuc.get(i).getIdSucursal(), lstClaveArt);
 			
 			if(lstOb != null && lstOb.size() > 0) {
 				List<Productos> lstPrd = new ArrayList<Productos>();
@@ -312,7 +364,7 @@ public class SucursalesServiceImpl implements ISucursalesService{
 					csRs.setProductos(lstPrd);					
 				}
 				lstConsulta.add(csRs);
-			}
+			}*/
 			
 			
 		}		
@@ -328,5 +380,11 @@ public class SucursalesServiceImpl implements ISucursalesService{
 	public List<Object> findArticulosByIdSucursalAndClaveArticulo(Integer idSucursal, List<String> lstClaveArticulo) {		
 		return sucursalesRepository.findArticulosByIdSucursalAndClaveArticulo(idSucursal, lstClaveArticulo);
 	}
+	
+	@Override
+	public List<Object> findArticulosByIdSucursalAndClaveArticuloValidCantidad(Integer idSucursal, String sku, Integer cantidad) {		
+		return sucursalesRepository.findArticulosByIdSucursalAndClaveArticuloValidCantidad(idSucursal, sku, cantidad);
+	}
+
 
 }

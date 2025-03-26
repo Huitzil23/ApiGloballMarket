@@ -21,4 +21,9 @@ public class ClaveArticulosRequest {
 	@NotNull 
 	@NotEmpty
 	private String sku;
+	
+	@JsonProperty(value="cantidad", required = true)
+	@NotNull 
+	@NotEmpty
+	private Integer cantidad;
 }
