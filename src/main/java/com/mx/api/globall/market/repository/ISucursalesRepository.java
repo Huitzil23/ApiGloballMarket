@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.mx.api.globall.market.model.Sucursales;
@@ -14,12 +15,12 @@ public interface ISucursalesRepository extends JpaRepository<Sucursales, Integer
 	List<Sucursales> findByCodigoPostalAndEstatus(String codigoPostal, Integer estatus);
 	
 	@Query(value = "SELECT C.IdComercio, C.NombreComercio, S.IdSucursal, S.Nombre as nombreSucursal,  A.ClaveArticulo, A.Nombre, I.ExistenciaFisica "
-			+ "FROM tbc_GTC_CatSucursal S "
-			+ "INNER JOIN tbc_GTC_Comercios C ON S.IdComercio = C.IdComercio "
-			+ "INNER JOIN tbc_GTC_Articulos A ON A.IdSucursal = S.IdSucursal "
-			+ "INNER JOIN tbc_GTC_CompuestoActivo  CA ON A.IdSucursal = CA.IdSucursal "
+			+ "FROM tbc_GTC_CatSucursal S WITH(NOLOCK) "
+			+ "INNER JOIN tbc_GTC_Comercios C WITH(NOLOCK) ON S.IdComercio = C.IdComercio "
+			+ "INNER JOIN tbc_GTC_Articulos A WITH(NOLOCK) ON A.IdSucursal = S.IdSucursal "
+			+ "INNER JOIN tbc_GTC_CompuestoActivo WITH(NOLOCK)  CA ON A.IdSucursal = CA.IdSucursal "
 			+ "AND A.IdCompuestoActivo = CA.IdCompuestoActivo "
-			+ "INNER JOIN tbc_GTC_Inventario I ON A.IdSucursal = I.IdSucursal "
+			+ "INNER JOIN tbc_GTC_Inventario I WITH(NOLOCK)  ON A.IdSucursal = I.IdSucursal "
 			+ "AND A.ClaveArticulo = I.ClaveArticulo "
 			+ "AND I.ExistenciaFisica > 0 "
 			+ "WHERE S.CodigoPostal = ?1 "
@@ -29,13 +30,14 @@ public interface ISucursalesRepository extends JpaRepository<Sucursales, Integer
 	@Query(value = " SELECT  distinct(I.IdSucursal) AS IdSucursal, "
 			+ " S.CodigoPostal, C.NombreComercio, S.Nombre AS NombreSucursal, C.Calle, C.NumeroExt, "
 			+ " CL.NobreColonia, D.Descripcion AS Delegacion, E.Estado, P.Pais "
-			+ " FROM tbc_GTC_CatSucursal S "
-			+ " INNER JOIN tbc_GTC_Inventario I ON I.IdSucursal = S.IdSucursal "
-			+ " INNER JOIN tbc_GTC_Comercios C ON S.IdComercio = C.IdComercio "
-			+ " INNER JOIN tbc_GTC_Pais P ON P.IdPais = S.IdPais "
-			+ " INNER JOIN tbc_GTC_Estado E ON E.IdEstado = S.IdEstado "
-			+ " INNER JOIN tbc_GTC_Delegacion D ON D.IdDelegacion = S.IdMunicipioDelegacion "
-			+ " INNER JOIN tbc_GTC_Colonia CL ON CL.IdColonia = S.IdColonia "	
+			+ " FROM tbc_GTC_CatSucursal S WITH(NOLOCK)  "
+			+ " INNER JOIN tbc_GTC_Inventario I WITH(NOLOCK)  ON I.IdSucursal = S.IdSucursal "
+			+ " AND I.ExistenciaFisica > 0"
+			+ " INNER JOIN tbc_GTC_Comercios C WITH(NOLOCK)  ON S.IdComercio = C.IdComercio "
+			+ " INNER JOIN tbc_GTC_Pais P WITH(NOLOCK)  ON P.IdPais = S.IdPais "
+			+ " INNER JOIN tbc_GTC_Estado E WITH(NOLOCK) ON E.IdEstado = S.IdEstado "
+			+ " INNER JOIN tbc_GTC_Delegacion D WITH(NOLOCK)  ON D.IdDelegacion = S.IdMunicipioDelegacion "
+			+ " INNER JOIN tbc_GTC_Colonia CL WITH(NOLOCK) ON CL.IdColonia = S.IdColonia "	
 			+ " WHERE S.IdTipoDistribucion = 1 "
 			+ " AND GEOGRAPHY\\:\\:Point(S.Latitud, S.Longitud, 4326).STDistance(GEOGRAPHY\\:\\:Point(?1, ?2, 4326)) / 1000 < ?3 "
 			+ " AND S.Latitud IS NOT NULL "
@@ -43,33 +45,35 @@ public interface ISucursalesRepository extends JpaRepository<Sucursales, Integer
 			, nativeQuery=true)
 	List<Object> findIdSucursalesCercaCPDistancia(String latitud, String longitud, float distancia);
 	
-	@Query(value = "SELECT A.ClaveArticulo, A.Nombre, A.PrecioPublico, I.ExistenciaFisica, AC.IdCompuestoActivo, "
+	@Query(value = "SELECT A.ClaveArticulo, A.Nombre, A.PrecioVenta, I.ExistenciaFisica, AC.IdCompuestoActivo, "
 			+ " A.Receta, (CASE WHEN A.Receta = 1 THEN 'true' ELSE 'false' END ) AS RecetaMax, "
 			+ " A.IdGrupoSSA, (CASE WHEN A.IdGrupoSSA = 1 OR A.IdGrupoSSA = 2 OR A.IdGrupoSSA = 3 THEN 'true' ELSE 'false' END) AS ControladoMax "
-			+ " FROM tbc_GTC_Articulos A "
-			+ " INNER JOIN tbc_GTC_Inventario I ON A.IdSucursal = I.IdSucursal "
+			+ " FROM tbc_GTC_Articulos A WITH(NOLOCK) "
+			+ " INNER JOIN tbc_GTC_Inventario I WITH(NOLOCK) ON A.IdSucursal = I.IdSucursal "
 			+ " AND A.ClaveArticulo = I.ClaveArticulo "
-			+ " INNER JOIN tbc_GTC_ArticulosCompuestoActivo AC ON AC.IdSucursal = A.IdSucursal "
+			+ " AND I.ExistenciaFisica > 0 "
+			+ " INNER JOIN tbc_GTC_ArticulosCompuestoActivo AC WITH(NOLOCK) ON AC.IdSucursal = A.IdSucursal "
 			+ " AND AC.ClaveArticulo = A.ClaveArticulo "
 			+ " WHERE A.IdSucursal = ?1 "
 			+ " AND AC.IdCompuestoActivo IN (?2) "
-			+ " AND A.PrecioPublico = (SELECT MAX(A.PrecioPublico)FROM tbc_GTC_Articulos A "
-			+ " INNER JOIN tbc_GTC_ArticulosCompuestoActivo CA ON CA.IdSucursal = A.IdSucursal "
-			+ " AND CA.ClaveArticulo = A.ClaveArticulo INNER JOIN tbc_GTC_Inventario I ON I.IdSucursal = A.IdSucursal AND I.ClaveArticulo = A.ClaveArticulo "
+			+ " AND A.PrecioPublico = (SELECT MAX(A.PrecioPublico)FROM tbc_GTC_Articulos A WITH(NOLOCK) "
+			+ " INNER JOIN tbc_GTC_ArticulosCompuestoActivo CA WITH(NOLOCK) ON  CA.IdSucursal = A.IdSucursal "
+			+ " AND CA.ClaveArticulo = A.ClaveArticulo INNER JOIN tbc_GTC_Inventario I WITH(NOLOCK) ON I.IdSucursal = A.IdSucursal AND I.ClaveArticulo = A.ClaveArticulo "
 			+ "	WHERE A.IdSucursal = AC.IdSucursal AND CA.IdCompuestoActivo = AC.IdCompuestoActivo GROUP BY CA.IdCompuestoActivo ) "
 			+ " UNION "
-			+ " SELECT A.ClaveArticulo, A.Nombre, A.PrecioPublico, I.ExistenciaFisica, AC.IdCompuestoActivo, "
+			+ " SELECT A.ClaveArticulo, A.Nombre, A.PrecioVenta, I.ExistenciaFisica, AC.IdCompuestoActivo, "
 			+ " A.Receta, (CASE WHEN A.Receta = 1 THEN 'true' ELSE 'false' END ) AS RecetaMax, "
 			+ " A.IdGrupoSSA, (CASE WHEN A.IdGrupoSSA = 1 OR A.IdGrupoSSA = 2 OR A.IdGrupoSSA = 3 THEN 'true' ELSE 'false' END) AS ControladoMin "
-			+ " FROM tbc_GTC_Articulos A "
-			+ " INNER JOIN tbc_GTC_Inventario I ON A.IdSucursal = I.IdSucursal "
+			+ " FROM tbc_GTC_Articulos A WITH(NOLOCK) "
+			+ " INNER JOIN tbc_GTC_Inventario I WITH(NOLOCK) ON A.IdSucursal = I.IdSucursal "
 			+ " AND A.ClaveArticulo = I.ClaveArticulo "
-			+ " INNER JOIN tbc_GTC_ArticulosCompuestoActivo AC ON AC.IdSucursal = A.IdSucursal "
+			+ " AND I.ExistenciaFisica > 0 "
+			+ " INNER JOIN tbc_GTC_ArticulosCompuestoActivo AC WITH(NOLOCK) ON AC.IdSucursal = A.IdSucursal "
 			+ " AND AC.ClaveArticulo = A.ClaveArticulo "
 			+ " WHERE A.IdSucursal = ?1"
 			+ " AND AC.IdCompuestoActivo IN (?2) "
-			+ " AND A.PrecioPublico = ( SELECT MIN(A.PrecioPublico) FROM tbc_GTC_Articulos A  INNER JOIN tbc_GTC_ArticulosCompuestoActivo CA ON CA.IdSucursal = A.IdSucursal "
-			+ " AND CA.ClaveArticulo = A.ClaveArticulo INNER JOIN tbc_GTC_Inventario I ON I.IdSucursal = A.IdSucursal  AND I.ClaveArticulo = A.ClaveArticulo WHERE A.IdSucursal = AC.IdSucursal  "
+			+ " AND A.PrecioPublico = ( SELECT MIN(A.PrecioPublico) FROM tbc_GTC_Articulos A WITH(NOLOCK) INNER JOIN tbc_GTC_ArticulosCompuestoActivo CA WITH(NOLOCK) ON CA.IdSucursal = A.IdSucursal "
+			+ " AND CA.ClaveArticulo = A.ClaveArticulo INNER JOIN tbc_GTC_Inventario I WITH(NOLOCK) ON I.IdSucursal = A.IdSucursal  AND I.ClaveArticulo = A.ClaveArticulo WHERE A.IdSucursal = AC.IdSucursal  "
 			+ " AND CA.IdCompuestoActivo = AC.IdCompuestoActivo GROUP BY CA.IdCompuestoActivo )"
 			+ " ORDER BY AC.IdCompuestoActivo "			
 			,nativeQuery = true)
@@ -79,9 +83,9 @@ public interface ISucursalesRepository extends JpaRepository<Sucursales, Integer
 	@Query(value = "SELECT A.ClaveArticulo, A.Nombre, A.PrecioPublico, I.ExistenciaFisica, AC.IdCompuestoActivo, "
 			+ " A.Receta, (CASE WHEN A.Receta = 1 THEN 'true' ELSE 'false' END ) AS RecetaMax, "
 			+ " A.IdGrupoSSA, (CASE WHEN A.IdGrupoSSA = 1 OR A.IdGrupoSSA = 2 OR A.IdGrupoSSA = 3 THEN 'true' ELSE 'false' END) AS ControladoMax  "
-			+ " FROM tbc_GTC_Articulos A "
-			+ " INNER JOIN tbc_GTC_Inventario I ON A.IdSucursal = I.IdSucursal "
-			+ " LEFT JOIN tbc_GTC_ArticulosCompuestoActivo AC ON AC.IdSucursal = A.IdSucursal  "
+			+ " FROM tbc_GTC_Articulos A WITH(NOLOCK) "
+			+ " INNER JOIN tbc_GTC_Inventario I WITH(NOLOCK) ON A.IdSucursal = I.IdSucursal "
+			+ " LEFT JOIN tbc_GTC_ArticulosCompuestoActivo AC WITH(NOLOCK) ON AC.IdSucursal = A.IdSucursal  "
 			+ " AND AC.ClaveArticulo = A.ClaveArticulo "
 			+ " WHERE A.IdSucursal = ?1 "
 			+ " AND A.ClaveArticulo IN (?2) "
@@ -89,12 +93,12 @@ public interface ISucursalesRepository extends JpaRepository<Sucursales, Integer
 			,nativeQuery = true)
 	List<Object> findArticulosByIdSucursalAndClaveArticulo(Integer idSucursal, List<String> lstClaveArticulo);
 	
-	@Query(value = "SELECT A.ClaveArticulo, A.Nombre, A.PrecioPublico, I.ExistenciaFisica, AC.IdCompuestoActivo, "
+	@Query(value = "SELECT A.ClaveArticulo, A.Nombre, A.PrecioVenta, I.ExistenciaFisica, AC.IdCompuestoActivo, "
 			+ " A.Receta, (CASE WHEN A.Receta = 1 THEN 'true' ELSE 'false' END ) AS RecetaMax, "
 			+ " A.IdGrupoSSA, (CASE WHEN A.IdGrupoSSA = 1 OR A.IdGrupoSSA = 2 OR A.IdGrupoSSA = 3 THEN 'true' ELSE 'false' END) AS ControladoMax  "
-			+ " FROM tbc_GTC_Articulos A "
-			+ " INNER JOIN tbc_GTC_Inventario I ON A.IdSucursal = I.IdSucursal "
-			+ " LEFT JOIN tbc_GTC_ArticulosCompuestoActivo AC ON AC.IdSucursal = A.IdSucursal  "
+			+ " FROM tbc_GTC_Articulos A WITH(NOLOCK) "
+			+ " INNER JOIN tbc_GTC_Inventario I WITH(NOLOCK) ON A.IdSucursal = I.IdSucursal "
+			+ " LEFT JOIN tbc_GTC_ArticulosCompuestoActivo AC WITH(NOLOCK) ON AC.IdSucursal = A.IdSucursal  "
 			+ " AND AC.ClaveArticulo = A.ClaveArticulo "
 			+ " WHERE A.IdSucursal = ?1 "
 			+ " AND A.ClaveArticulo = ?2 "
@@ -102,5 +106,9 @@ public interface ISucursalesRepository extends JpaRepository<Sucursales, Integer
 			+ " AND A.ClaveArticulo = I.ClaveArticulo "			
 			,nativeQuery = true)
 	List<Object> findArticulosByIdSucursalAndClaveArticuloValidCantidad(Integer idSucursal, String sku, Integer cantidad);
+	
+	@Query(value="{CALL dbo.spl_GTC_ConsultaArticulosSucursalesPorCompuesto(:compuestosActivos, :latitud, :longitud, :distancia)}", nativeQuery = true)
+	List<Object> ConsultaArticulosSucursalesPorCompuesto(@Param("compuestosActivos") String compuestosActivos,
+			@Param("latitud") String latitud, @Param("longitud") String longitud, @Param("distancia") float distancia);
 
 }

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.mx.api.globall.market.bean.BuscaSucursalCodigoPostalResponse;
 import com.mx.api.globall.market.bean.ClaveArticulosRequest;
 import com.mx.api.globall.market.bean.ConsultaSucursalesByClaveArticuloRequest;
+import com.mx.api.globall.market.bean.ConsultaSucursalesProductosAux;
 import com.mx.api.globall.market.bean.ConsultaSucursalesProductosRequest;
 import com.mx.api.globall.market.bean.ConsultaSucursalesProductosResponse;
 import com.mx.api.globall.market.bean.Productos;
@@ -90,16 +91,12 @@ public class SucursalesServiceImpl implements ISucursalesService{
 
 	@Override
 	public List<ConsultaSucursalesProductosResponse> buscaIdSucursalesCercaCPDistancia(ConsultaSucursalesProductosRequest consultaSucursalesProductosRequest, float distancia) {
-		List<SucursalesAux>lstIdSuc = new ArrayList<SucursalesAux>();
-		List<Object> lstObj = new ArrayList<Object>();
+		//List<SucursalesAux>lstIdSuc = new ArrayList<SucursalesAux>();
+		//List<Object> lstObj = new ArrayList<Object>();
 		@SuppressWarnings("unused")
 		String cp = consultaSucursalesProductosRequest.getCodigoPostalPaciente();
 		String latitud = consultaSucursalesProductosRequest.getLatitudPaciente();
 		String longitud = consultaSucursalesProductosRequest.getLongitudPaciente();
-		System.out.println("Lista id compuesto activo " + consultaSucursalesProductosRequest.getCompuestosActivos().toString());
-		
-		
-		
 		
 		if(consultaSucursalesProductosRequest.getInformacionPaciente() != null) {
 			ClienteMarketplace validaCliente = clienteRepo.findIdClienteMarketByIdMarketplaceAndIdClienteExterno(idMarketplaceBeep, 
@@ -139,7 +136,7 @@ public class SucursalesServiceImpl implements ISucursalesService{
 		}
 		
 		
-		lstObj = findIdSucursalesCercaCPDistancia(latitud, longitud, distancia);
+		/*lstObj = findIdSucursalesCercaCPDistancia(latitud, longitud, distancia);
 		for(Object object:lstObj) {
 			Object[]obj = (Object[])object;
 			SucursalesAux scAuc = new SucursalesAux();
@@ -154,14 +151,69 @@ public class SucursalesServiceImpl implements ISucursalesService{
 			scAuc.setEstado((obj[8] != null ? (String)obj[8] : ""));
 			scAuc.setPais((obj[9] != null ? (String)obj[9] : ""));
 			lstIdSuc.add(scAuc);
-		}
+		}*/	
 		
 		String idCA = "";
-		for(int i = 0;i < consultaSucursalesProductosRequest.getCompuestosActivos().size(); i++) {
 		
-			idCA = consultaSucursalesProductosRequest.getCompuestosActivos().get(i).getIdCompuestoActivo() + "," + idCA;
+		for(int i = 0;i < consultaSucursalesProductosRequest.getCompuestosActivos().size(); i++) {		
+			idCA = consultaSucursalesProductosRequest.getCompuestosActivos().get(i).getIdCompuestoActivo() + "," + idCA;			
 		}
-		List<String> lstCompuestos = new ArrayList<String>(Arrays.asList(String.valueOf(idCA).split(",")));
+		
+		System.out.println("Lista Compuestos = " + idCA);
+		List<Object> lstRepuestaSP =  ConsultaArticulosSucursalesPorCompuesto(idCA, latitud, longitud, distancia);
+		
+		List<ConsultaSucursalesProductosAux> lstRespCon = parseObjConsultaSucursalesProductos(lstRepuestaSP);
+		int idSucursalAux = 0;
+		List<ConsultaSucursalesProductosResponse>lstConsultaSP = new ArrayList<ConsultaSucursalesProductosResponse>();
+		List<Productos> lstProductos = new ArrayList<Productos>();
+		int tamanioLista = lstRespCon.size();
+		int regGuardados = 0;
+		for(int i=0; i < lstRespCon.size(); i++) {
+			regGuardados++;
+			int idSucursal = lstRespCon.get(i).getIdSucursal();			
+			
+			ConsultaSucursalesProductosResponse csRs = new ConsultaSucursalesProductosResponse();
+			
+			
+			if(regGuardados < tamanioLista) {
+				idSucursalAux = lstRespCon.get(i + 1).getIdSucursal();
+			}else {
+				idSucursalAux = lstRespCon.get(i).getIdSucursal();
+			}
+			
+			Productos prd = new Productos();					
+			prd.setSku(lstRespCon.get(i).getClaveArticulo());
+			prd.setNombre(lstRespCon.get(i).getNombreArticulo());
+			prd.setDescripcion(lstRespCon.get(i).getNombreArticulo());
+			prd.setPrecioPublico(lstRespCon.get(i).getPrecioVenta());
+			prd.setExistencia(lstRespCon.get(i).getExistenciaFisica());
+			prd.setRequiereReceta(lstRespCon.get(i).getRequiereReceta());
+			prd.setEsControlado(lstRespCon.get(i).getControlado());
+			prd.setIdCompuestoActivo(lstRespCon.get(i).getIdCompuestoActivo());
+			prd.setNombreCompuestoActivo(lstRespCon.get(i).getNombreCompuesto());
+			lstProductos.add(prd);
+			
+			if(idSucursalAux > 0 && (idSucursal != idSucursalAux) || (tamanioLista == regGuardados)) {				
+				csRs = new ConsultaSucursalesProductosResponse();
+				csRs.setIdSucursal(lstRespCon.get(i).getIdSucursal());					
+				csRs.setCodigoPostal(lstRespCon.get(i).getCodigoPostal());
+				csRs.setNombreComercio(lstRespCon.get(i).getNombreComercio());
+				csRs.setNombreSucursal(lstRespCon.get(i).getNombreSucursal());
+				csRs.setCalle(lstRespCon.get(i).getCalle());
+				csRs.setNumeroExterior(lstRespCon.get(i).getNumeroExt());
+				csRs.setColonia(lstRespCon.get(i).getNombreColonia());
+				csRs.setMunicipioDelegacion(lstRespCon.get(i).getDelegacion());
+				csRs.setEstado(lstRespCon.get(i).getEstado());
+				csRs.setPais(lstRespCon.get(i).getPais());
+				csRs.setProductos(lstProductos);
+				lstConsultaSP.add(csRs);
+				lstProductos = new ArrayList<Productos>();
+				idSucursalAux = idSucursal;
+			}
+			
+		}
+		
+		/*List<String> lstCompuestos = new ArrayList<String>(Arrays.asList(String.valueOf(idCA).split(",")));
 		
 		List<ConsultaSucursalesProductosResponse>lstConsulta = new ArrayList<ConsultaSucursalesProductosResponse>();
 		for(int i=0; i < lstIdSuc.size(); i++) {
@@ -200,8 +252,8 @@ public class SucursalesServiceImpl implements ISucursalesService{
 			}
 			
 			
-		}		
-		return lstConsulta;
+		}	*/	
+		return lstConsultaSP;
 	}
 	
 	@SuppressWarnings("unused")
@@ -370,6 +422,37 @@ public class SucursalesServiceImpl implements ISucursalesService{
 		}		
 		return lstConsulta;
 	}
+	
+	public List<ConsultaSucursalesProductosAux> parseObjConsultaSucursalesProductos(List<Object> lstObj ){
+		List<ConsultaSucursalesProductosAux> lstConsulta = new ArrayList<ConsultaSucursalesProductosAux>();
+		
+		for(Object object : lstObj){
+			Object[] obj = (Object[])object;
+			ConsultaSucursalesProductosAux sucProd = new ConsultaSucursalesProductosAux();
+			sucProd.setIdSucursal(obj[0] != null ? (Integer)obj[0] : 0);
+			sucProd.setCodigoPostal(obj[1] != null ? (String)obj[1] : "");
+			sucProd.setNombreComercio(obj[2] != null ? (String)obj[2] : "");
+			sucProd.setNombreSucursal(obj[3] != null ? (String)obj[3] : "");
+			sucProd.setCalle(obj[4] != null ? (String)obj[4] : "");
+			sucProd.setNumeroExt(obj[5] != null ? (String)obj[5] : "");
+			sucProd.setNombreColonia(obj[6] != null ? (String)obj[6] : "");
+			sucProd.setDelegacion(obj[7] != null ? (String)obj[7] : "");
+			sucProd.setEstado(obj[8] != null ? (String)obj[8] : "");
+			sucProd.setPais(obj[9] != null ? (String)obj[9] : "");
+			sucProd.setClaveArticulo(obj[10] != null ? (String)obj[10] : "");
+			sucProd.setNombreArticulo(obj[11] != null ? (String)obj[11] : "");
+			sucProd.setPrecioVenta(obj[12] != null ? (BigDecimal)obj[12] : new BigDecimal(0));
+			sucProd.setExistenciaFisica(obj[13] != null ? (Integer)obj[13] : 0);
+			sucProd.setIdCompuestoActivo(obj[14] != null ? (Integer)obj[14] : 0);
+			//sucProd.setReceta(obj[15] != null ? (Integer)obj[15] : 0);
+			sucProd.setRequiereReceta(obj[16] != null ? Boolean.valueOf(obj[16].toString()) : false);
+			sucProd.setIdGrupoSSA(obj[17] != null ? (Integer)obj[17] : 0);
+			sucProd.setControlado(obj[18] != null ? Boolean.valueOf(obj[18].toString()) : false);
+			sucProd.setNombreCompuesto(obj[19] != null ? (String)obj[19] : "");
+			lstConsulta.add(sucProd);
+		}
+		return lstConsulta;
+	}
 
 	@Override
 	public List<Object> findArticulosByIdSucursalAndIdCompuestoActivo(Integer idSucursal, List<String> lstCompuestosActivos) {		
@@ -384,6 +467,11 @@ public class SucursalesServiceImpl implements ISucursalesService{
 	@Override
 	public List<Object> findArticulosByIdSucursalAndClaveArticuloValidCantidad(Integer idSucursal, String sku, Integer cantidad) {		
 		return sucursalesRepository.findArticulosByIdSucursalAndClaveArticuloValidCantidad(idSucursal, sku, cantidad);
+	}
+
+	@Override
+	public List<Object> ConsultaArticulosSucursalesPorCompuesto(String compuestosActivos, String latitud, String longitud, float distancia) {		
+		return sucursalesRepository.ConsultaArticulosSucursalesPorCompuesto(compuestosActivos, latitud, longitud, distancia);
 	}
 
 

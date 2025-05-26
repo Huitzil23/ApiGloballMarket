@@ -22,4 +22,6 @@ public interface ISucursalesService {
 	List<Object> findArticulosByIdSucursalAndClaveArticulo(Integer idSucursal, List<String> lstClaveArticulo);
 	List<Object> findArticulosByIdSucursalAndClaveArticuloValidCantidad(Integer idSucursal, String sku, Integer cantidad);
 	
+	List<Object> ConsultaArticulosSucursalesPorCompuesto(String compuestosActivos, String latitud, String longitud, float distancia);
+	
 }

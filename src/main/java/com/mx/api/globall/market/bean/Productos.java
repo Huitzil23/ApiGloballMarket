@@ -20,5 +20,7 @@ public class Productos {
 	private BigDecimal PrecioPublico;
 	private Boolean requiereReceta;
 	private Boolean esControlado;
+	private Integer idCompuestoActivo;
+	private String nombreCompuestoActivo;
 
 }
